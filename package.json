@@ -1,0 +1,11 @@
+{
+  "name": "regelsamling-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sökbar mobil regelsamling",
+  "scripts": {
+    "test": "node --test tests/core.test.mjs",
+    "start": "node scripts/serve.mjs"
+  }
+}
