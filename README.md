@@ -10,7 +10,9 @@ En mobilanpassad, installerbar webbapp för iPhone, Android och dator.
 - Läs hela bestämmelsen och öppna dess officiella källa.
 - Spara lagrum lokalt på enheten.
 - Installerbar PWA med offlinecache efter en komplett första hämtning.
-- Ljus design i blått och orange, anpassad för mobil och större skärm.
+- Mörkt läge som standard, med sparat val av ljust eller mörkt läge.
+- Orange och blå accenter, anpassade för mobil och större skärm.
+- Uppdateringsknapp som hämtar senaste publicerade appversion och laddar om utan att radera bokmärken eller filter.
 
 ## Innehåll
 

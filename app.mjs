@@ -1,6 +1,8 @@
 import {buildIndex,search,fold,snippet,highlight,escapeHTML as esc} from './core.mjs';
 const $=s=>document.querySelector(s);
 const icons={
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/>',
+moon:'<path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/>',
 search:'<circle cx="10.5" cy="10.5" r="6.8"/><path d="m16 16 4.5 4.5"/>',
 book:'<path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Zm0 0v15"/>',
 bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
@@ -18,8 +20,6 @@ refresh:'<path d="M20 6v5h-5M4 18v-5h5"/><path d="M5 8a8 8 0 0 1 13-3l2 3M4 16l2
 function drawIcons(scope=document){scope.querySelectorAll('i[data-icon]').forEach(i=>{i.setAttribute('aria-hidden','true');i.innerHTML='<svg viewBox="0 0 24 24">'+(icons[i.dataset.icon]||icons.book)+'</svg>';});}
 drawIcons();
 let data,index=[],lawMap=new Map(),recordMap=new Map(),saved=new Set(),currentTerms=[],rows=[],toastTimer,debounce,installPrompt,lastFocus;
-let reloadForUpdate=false;
-if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloadForUpdate)location.reload();});
 let state={view:'search',query:'',law:'',chapter:'',limit:30,current:null};
 try{const raw=JSON.parse(localStorage.getItem('regelsamling.saved.v1')||'[]');if(Array.isArray(raw))saved=new Set(raw.filter(x=>typeof x==='string'));}catch{}
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2800);}
@@ -63,16 +63,82 @@ $('#browse-record-law').onclick=()=>{const r=recordMap.get(state.current);closeR
 $('#copy-record').onclick=async()=>{const r=recordMap.get(state.current);if(!r)return;const text=[r.lawInfo.title,r.title,...r.paragraphs,...(r.table||[]).map(row=>row.join(' — ')),r.afterTable||'',...(r.advice||[]),r.timing?'Tidsmarkering: '+r.timing:'','Underlag kontrollerat 2026-11-17',r.lawInfo.source].filter(Boolean).join('\n\n');try{await navigator.clipboard.writeText(text);toast('Lagrummet kopierat');}catch{toast('Kopiering kunde inte slutföras. Markera texten och kopiera.');}};
 document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!$('#reader').open){e.preventDefault();navigate('search');$('#query').focus();}});
 window.addEventListener('hashchange',restoreURL);
+
+function applyTheme(theme,{persist=false}={}){
+ theme=theme==='light'?'light':'dark';
+ document.documentElement.dataset.theme=theme;
+ document.querySelector('meta[name="theme-color"]').content=theme==='dark'?'#101923':'#f8fafc';
+ document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').content=theme==='dark'?'black-translucent':'default';
+ const action=theme==='dark'?'Växla till ljust läge':'Växla till mörkt läge';
+ $('#theme-toggle').setAttribute('aria-label',action);$('#theme-toggle').title=action;
+ $('#theme-toggle').innerHTML='<i data-icon="'+(theme==='dark'?'sun':'moon')+'"></i>';drawIcons($('#theme-toggle'));
+ if(persist){try{localStorage.setItem('regelsamling.theme.v1',theme);}catch{toast('Visningen ändras för den här sessionen.');}}
+}
+applyTheme(document.documentElement.dataset.theme);
+$('#theme-toggle').onclick=()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',{persist:true});
+window.addEventListener('storage',event=>{if(event.key==='regelsamling.theme.v1')applyTheme(event.newValue);});
+
 function showInstall(){$('#native-install').classList.toggle('hidden',!installPrompt);$('#install-dialog').showModal();}
 for(const s of ['#install-desktop','#install-top','#offline-status'])$(s).onclick=showInstall;
 $('#close-install').onclick=()=>$('#install-dialog').close();
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;});
 $('#native-install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;$('#install-dialog').close();}};
 async function updateOfflineStatus(){try{const keys=await caches.keys();const ready=keys.some(k=>k.startsWith('regelsamling-'));if(ready){$('#offline-status').innerHTML='<span class="status-dot"></span>Tillgänglig offline';$('#offline-status').classList.add('ready');}}catch{}}
-$('#check-update').onclick=async()=>{const el=$('#update-status');el.textContent='Kontrollerar…';try{const reg=await navigator.serviceWorker?.getRegistration();if(reg){await reg.update();if(reg.installing){const worker=reg.installing;await new Promise(resolve=>worker.addEventListener('statechange',()=>{if(['installed','redundant'].includes(worker.state))resolve();}));}if(reg.waiting){reloadForUpdate=true;reg.waiting.postMessage({type:'ACTIVATE'});el.textContent='Uppdateringen installeras.';}else el.textContent='Kontroll genomförd. Innehållets kontrolldatum är fortfarande 17 november 2026.';}else{el.textContent='Ladda om appen med internetanslutning för att hämta senaste publicerade version.';}}catch{el.textContent='Kunde inte kontrollera uppdateringar. Kontrollera internetanslutningen.';}};
-async function setupOffline(){if(!('serviceWorker'in navigator))return;try{const hadController=!!navigator.serviceWorker.controller;const reg=await navigator.serviceWorker.register('./sw.js');reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'){updateOfflineStatus();if(hadController&&reg.waiting)toast('En appuppdatering finns. Öppna Om för att uppdatera.');}});});await navigator.serviceWorker.ready;updateOfflineStatus();}catch{}}
+
+let refreshBusy=false;
+function setRefreshBusy(value){
+ refreshBusy=value;
+ for(const id of ['#refresh-app','#check-update']){$(id).disabled=value;$(id).setAttribute('aria-busy',String(value));}
+}
+function updateMessage(message){$('#update-status').textContent=message;toast(message);}
+function waitForWorker(worker){
+ return new Promise((resolve,reject)=>{
+  const finish=error=>{clearTimeout(timer);worker.removeEventListener('statechange',changed);error?reject(error):resolve();};
+  const changed=()=>{if(['installed','activated'].includes(worker.state))finish();else if(worker.state==='redundant')finish(new Error('Installation failed'));};
+  const timer=setTimeout(()=>finish(new Error('Installation timeout')),20000);
+  worker.addEventListener('statechange',changed);changed();
+ });
+}
+function activateUpdate(worker){
+ return new Promise((resolve,reject)=>{
+  const finish=error=>{clearTimeout(timer);navigator.serviceWorker.removeEventListener('controllerchange',changed);error?reject(error):resolve();};
+  const changed=()=>finish();
+  const timer=setTimeout(()=>finish(new Error('Activation timeout')),12000);
+  navigator.serviceWorker.addEventListener('controllerchange',changed);
+  worker.postMessage({type:'ACTIVATE'});
+ });
+}
+async function refreshApp(){
+ if(refreshBusy)return;
+ clearTimeout(debounce);if(data){runSearch();syncHash();}
+ setRefreshBusy(true);$('#update-status').textContent='Söker efter senaste appversionen…';toast('Uppdaterar appen…');
+ try{
+  const reg='serviceWorker' in navigator?await navigator.serviceWorker.getRegistration():null;
+  if(!reg?.waiting){
+   if(navigator.onLine===false)throw new Error('Offline');
+   if(reg){
+    if(reg.installing)await waitForWorker(reg.installing);
+    await reg.update();
+    if(reg.installing)await waitForWorker(reg.installing);
+   }else{
+    const probe=await fetch('./index.html?refresh='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(15000)});
+    if(!probe.ok)throw new Error('Refresh failed');
+   }
+  }
+  if(reg?.waiting)await activateUpdate(reg.waiting);
+  try{sessionStorage.setItem('regelsamling.refreshed','1');}catch{}
+  location.reload();
+ }catch{
+  updateMessage('Kunde inte uppdatera. Kontrollera internetanslutningen och försök igen. Sparade lagrum finns kvar.');
+  setRefreshBusy(false);
+ }
+}
+$('#check-update').onclick=refreshApp;
+$('#refresh-app').onclick=refreshApp;
+
+async function setupOffline(){if(!('serviceWorker'in navigator))return;try{const hadController=!!navigator.serviceWorker.controller;const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'){updateOfflineStatus();if(hadController&&reg.waiting)toast('En ny version finns. Tryck på uppdateringsknappen.');}});});await navigator.serviceWorker.ready;updateOfflineStatus();}catch{}}
 try{
 const res=await fetch('./assets/regelsamling.json');if(!res.ok)throw new Error('HTTP '+res.status);data=await res.json();index=buildIndex(data);lawMap=new Map(data.laws.map(l=>[l.id,l]));recordMap=new Map(index.map(r=>[r.id,r]));saved=new Set([...saved].filter(id=>recordMap.has(id)));$('#saved-count').textContent=saved.size;
 $('#law-filter').innerHTML='<option value="">Alla författningar</option>'+data.laws.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+'</option>').join('');
-$('#featured-laws').innerHTML=['1984-387','1942-740','1962-700','2009-400'].map((id,i)=>lawCard(lawMap.get(id),i)).join('');drawIcons($('#featured-laws'));renderLaws();restoreURL();setupOffline();
+$('#featured-laws').innerHTML=['1984-387','1942-740','1962-700','2009-400'].map((id,i)=>lawCard(lawMap.get(id),i)).join('');drawIcons($('#featured-laws'));renderLaws();restoreURL();setupOffline();try{if(sessionStorage.getItem('regelsamling.refreshed')){sessionStorage.removeItem('regelsamling.refreshed');toast('Appen har laddats om.');}}catch{}
 }catch(err){$('#search-home').classList.add('hidden');$('#load-error').classList.remove('hidden');console.error('Regelsamlingen kunde inte laddas',err);}

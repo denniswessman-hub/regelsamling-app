@@ -12,3 +12,68 @@
 .info-strip p{color:#846c57}.text-button,.reader-source a,.about-footer a{color:#4f7493}
 .primary-button{background:#527b9e}.primary-button:hover{background:#426c90}
 @media(max-width:760px){.search-box input,.browse-search input{font-size:16px}.filters select{font-size:12px;min-height:38px}.filters label>span{font-size:9px}.suggestions button{min-height:32px;font-size:10px}.mobile-nav button{font-size:11px;color:#648098}.law-card .count{font-size:10px}.result-card .record-law{font-size:10px}.reader-top .icon-button,.save-btn{min-width:44px;min-height:44px}.result-open{padding-right:57px}.result-card p{font-size:13px}}
+
+/* Theme controls and explicit dark default. */
+:root{color-scheme:light}
+.header-actions{display:flex;align-items:center;gap:6px}
+.header-actions .icon-button{width:40px;height:44px;color:#617d94}
+.refresh-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:1px solid #dce6ee;border-radius:10px;padding:0 12px;font-size:11px;color:#4f7493;background:#fff}
+.refresh-button:hover{background:#edf4fa}
+.refresh-button[aria-busy="true"] i,#check-update[aria-busy="true"] i{animation:refresh-spin 1.2s linear infinite}
+@keyframes refresh-spin{to{transform:rotate(360deg)}}
+:root[data-theme="dark"]{color-scheme:dark}
+[data-theme="dark"] body{background:#101923;color:#dce7ef}
+[data-theme="dark"] :is(.sidebar,.topbar){background:#141f2b;border-color:#2b3c4c}
+[data-theme="dark"] :is(.brand span,.mobile-brand strong,h1,.section-title h2,.page-heading h1,.law-card strong,.all-law strong,.result-card h3,.result-summary strong,.about-card h2,.empty h2,#install-dialog h2){color:#e1ecf4}
+[data-theme="dark"] h1 em{color:#91b9da}
+[data-theme="dark"] :is(.brand small,.nav-label,.mini,.law-card small,.filters label>span,.bottom-meta,.hero p,.page-heading>p,.sidebar-bottom>span,.law-card .count,.all-law small,.result-card p,.about-card p,.about-card ul,.about-card .fine,.about-footer,.reader-source,.suggestions,.breadcrumb,.status-chip,.result-card .record-law,.result-card h3 span,.reader-intro>span,.reader-intro>p,.reader-top>span,.reader-bottom button,.result-summary,#update-status){color:#a5bacb}
+[data-theme="dark"] :is(.nav-item,.header-actions .icon-button){color:#a3bcd1}
+[data-theme="dark"] :is(.nav-item:hover,.nav-item.active,.icon-button:hover){background:#22374a;color:#b6d9f4}
+[data-theme="dark"] .nav-item small{background:#142331}
+[data-theme="dark"] .sidebar-bottom{background:linear-gradient(145deg,#1a2938,#172534);border-color:#2b3d4e}
+[data-theme="dark"] :is(.edition-icon,.card-icon.blue,.law-symbol){background:#22384d;color:#a0c4e2}
+[data-theme="dark"] :is(.card-icon.orange,.law-card.orange .law-symbol){background:#3b2e24;color:#e8b58b}
+[data-theme="dark"] :is(.search-panel,.law-card,.all-law,.result-card,.about-card,.browse-search,.status-chip,.suggestions button,.refresh-button,.load-more,.empty,kbd,.skip){background:#182634;border-color:#2d4154}
+[data-theme="dark"] :is(.law-card:hover,.all-law:hover,.result-card:hover,.suggestions button:hover){border-color:#6c96b8}
+[data-theme="dark"] :is(.filters,.reader-bottom){background:#14212e;border-color:#2b3c4c}
+[data-theme="dark"] :is(.search-box,.filters label:first-child,.reader-top,.reader-source){border-color:#2b3e50}
+[data-theme="dark"] :is(.search-box input,.browse-search input,.filters select){color:#d5e5f1}
+[data-theme="dark"] :is(.search-box input::placeholder,.browse-search input::placeholder){color:#99adbf}
+[data-theme="dark"] .filters select:disabled{color:#7c8f9f}
+[data-theme="dark"] select option{background:#182634;color:#dce7ef}
+[data-theme="dark"] :is(.suggestions button,.text-button,.load-more,.reader-source a,.about-footer a,.about-card summary,.about-card p strong,.reader-source strong,.refresh-button){color:#a6cdee}
+[data-theme="dark"] .refresh-button:hover{background:#253d52}
+[data-theme="dark"] .hero-symbol{background:#1c2f41;border-color:#253b4e;color:#729ab9}
+[data-theme="dark"] .hero-symbol span{background:#3b2b20;border-color:#101923;color:#e4ab7b}
+[data-theme="dark"] .eyebrow{color:#dfac85}
+[data-theme="dark"] .info-strip{background:#2c251f;border-color:#4a392c}
+[data-theme="dark"] .info-strip-icon{background:#423024;color:#e7b087}
+[data-theme="dark"] .info-strip strong{color:#e3ba98}
+[data-theme="dark"] .info-strip p{color:#c5ab96}
+[data-theme="dark"] .tag{background:#243d52;color:#b4d4ed}
+[data-theme="dark"] .tag.gray{background:#2a3541;color:#b7c5d0}
+[data-theme="dark"] .tag.orange{background:#433022;color:#edbd96}
+[data-theme="dark"] mark{background:#654829;color:#fff1d7}
+[data-theme="dark"] .saved{color:#f0b57f!important}
+[data-theme="dark"] .saved svg{fill:#533a26}
+[data-theme="dark"] .primary-button{background:#93bad9;color:#11283b}
+[data-theme="dark"] .primary-button:hover{background:#b0d1eb}
+[data-theme="dark"] :is(#reader,#install-dialog){background:#15222f;color:#d8e5ef}
+[data-theme="dark"] .legal-text{color:#dce7ef}
+[data-theme="dark"] .legal-text .advice{background:#1f3242;border-color:#739cbc}
+[data-theme="dark"] .timing{background:#30271f;border-color:#59412d;color:#ebbf98}
+[data-theme="dark"] :is(.legal-table td,.legal-table th){border-color:#3a5062}
+[data-theme="dark"] .legal-table th{background:#233a4e;color:#c1d9ec}
+[data-theme="dark"] #install-dialog{color:#b2c6d5}
+[data-theme="dark"] .mobile-nav{background:#141f2bf5;border-color:#2b3e50}
+[data-theme="dark"] .mobile-nav button{color:#a2bbce}
+[data-theme="dark"] .mobile-nav button.active{background:#263e52;color:#c0dff5}
+[data-theme="dark"] #toast{background:#c3dcf0;color:#172a39}
+[data-theme="dark"] dialog::backdrop{background:#030910aa}
+@media(max-width:760px){
+ .topbar{padding:0 14px;gap:4px}.topbar .status-chip{display:none}
+ .header-actions{gap:2px}.header-actions .icon-button,.header-actions .refresh-button{width:40px;height:44px;min-width:40px;padding:0}
+ .header-actions .refresh-button span{display:none}.header-actions .refresh-button{border:0;background:transparent}
+ .mobile-brand{gap:7px}.mobile-brand strong{font-size:15px}.mobile-brand img{width:30px;height:30px}
+}
+@media(max-width:360px){.mobile-brand img{display:none}.topbar{padding:0 11px}.header-actions{gap:0}}
