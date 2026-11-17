@@ -7,7 +7,7 @@ const index=buildIndex(data);
 test('all imported records have stable unique identifiers and official sources',()=>{
  assert.equal(data.laws.length,49); assert.equal(data.records.length,1907);
  assert.equal(new Set(index.map(r=>r.id)).size,index.length);
- for(const r of index){assert.ok(r.lawInfo);assert.ok(r.paragraphs.length||r.table?.length);assert.match(r.lawInfo.source,/^https://(?:data.riksdagen.se|www.riksdagen.se|rkrattsbaser.gov.se|polisen.se)//);}
+ for(const r of index){assert.ok(r.lawInfo);assert.ok(r.paragraphs.length||r.table?.length);assert.match(r.lawInfo.source,/^https:\/\/(?:data\.riksdagen\.se|www\.riksdagen\.se|rkrattsbaser\.gov\.se|polisen\.se)\//);}
 });
 test('precise citations resolve to one correct provision',()=>{
  for(const [q,id] of [['PL 13','1984-387--13'],['RB 24:8','1942-740-24-8'],['BrB 24 kap. 1 §','1962-700-24-1'],['PL 28 a §','1984-387--28a']]){
